@@ -4,16 +4,16 @@ import './Count.css';
 import Couter from '../components/Counter.js';
 import heart from '../images/heart.png'
 
-document.title = 'Lon';
+
 
 
 
 const Count = () => {
   const [backgroundColor, setBackgroundColor] = useState('');
   const colors = [ '#33336a', '#4d2771'];
-  const words = ["hello world","print('hello world')", "system.out.println('hello world')","console.log('hello world')"]
 
   useEffect(() => {
+    document.title = '<3';
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     setBackgroundColor(randomColor);
   }, []);

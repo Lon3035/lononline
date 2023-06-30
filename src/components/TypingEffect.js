@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TypingEffect.css';
 
 const TypingEffect = ({ words }) => {
@@ -10,14 +10,15 @@ const TypingEffect = ({ words }) => {
   const [deleteComplete, setDeleteComplete] = useState(false);
   const [charIndex, setCharIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
-  const [delay, setDelay] = useState(250);
+  const [delay, setDelay] = useState(150);
   const [blinkDelay, setBlinkDelay] = useState(7000);
+  const containerRef = useRef(null);
 
   const handleTypingEffect = () => {
     const word = words[wordIndex];
     const isLastWord = wordIndex === words.length - 1;
     const currentCharIndex = isDeleting ? charIndex - 1 : charIndex;
-  
+
     if (!isDeleting && !textCompleted) {
       const nextChar = word[currentCharIndex];
       if (nextChar) {
@@ -25,7 +26,7 @@ const TypingEffect = ({ words }) => {
         setCharIndex((prevIndex) => prevIndex + 1);
       } else {
         setIsDeleting(true);
-        setDelay(150);
+        setDelay(100);
         if (isLastWord) {
           setTextCompleted(true);
         }
@@ -38,13 +39,23 @@ const TypingEffect = ({ words }) => {
       setDeleteComplete(false);
     } else if (isDeleting && displayText.length === 0) {
       setIsDeleting(false);
-      setDelay(250);
+      setDelay(150);
       if (isLastWord) {
         setTextCompleted(true);
       } else {
         setWordIndex((prevIndex) => prevIndex + 1);
         setCharIndex(0);
         setDisplayText('');
+      }
+    }
+  };
+
+  const handleGlobalKeyPress = (event) => {
+    if (containerRef.current && !textCompleted) {
+      if (event.key.length === 1) {
+        setDisplayText((prevText) => prevText + event.key);
+      } else if (event.key === 'Backspace') {
+        setDisplayText((prevText) => prevText.slice(0, -1));
       }
     }
   };
@@ -70,10 +81,22 @@ const TypingEffect = ({ words }) => {
       setShowCursor(true);
     }
   }, [showCursor, isDeleting, blinkDelay]);
-  
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleGlobalKeyPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyPress);
+    };
+  }, []);
 
   return (
-    <div className="typing-effect">
+    <div
+      className="typing-effect"
+      ref={containerRef}
+      tabIndex="0"
+      onClick={() => containerRef.current.focus()}
+    >
       <span className="text">{displayText}</span>
       {showCursor && <span className="cursor" />}
     </div>
